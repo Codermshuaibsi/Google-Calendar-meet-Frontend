@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const Dashboard = () => {
   const [events, setEvents] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [formData, setFormData] = useState({ title: "", time: "" });
+  const [formData, setFormData] = useState({ title: "", time: "", attendee: "" });
 
   const email = new URLSearchParams(window.location.search).get("email");
 
@@ -45,7 +45,7 @@ const Dashboard = () => {
   };
 
   const handleCreateEvent = async () => {
-    if (!formData.title || !formData.time)
+    if (!formData.title || !formData.time || !formData.attendee)
       return alert("Please fill all fields");
 
     const event = {
@@ -58,6 +58,15 @@ const Dashboard = () => {
         dateTime: `${selectedDate}T${formData.time}:00`,
         timeZone: "Asia/Kolkata",
       },
+      attendees: [
+        { email: formData.attendee },
+      ],
+      conferenceData: {
+        createRequest: {
+          requestId: uuidv4(),
+          conferenceSolutionKey: { type: "hangoutsMeet" },
+        },
+      },
     };
 
     try {
@@ -66,7 +75,7 @@ const Dashboard = () => {
         event,
       });
       alert("✅ Event Created!");
-      setFormData({ title: "", time: "" });
+      setFormData({ title: "", time: "", attendee: "" });
       setSelectedDate(null);
       fetchEvents();
     } catch (err) {
@@ -183,10 +192,6 @@ const Dashboard = () => {
         <AnimatePresence>
           {selectedDate && (
             <motion.div
-              // key="modal"
-              // initial={{ opacity: 0, y: 50, scale: 0.1, scrollBehavior:"smooth" }}
-              // animate={{ opacity: 1, y: 0, scale: 1 }}
-              // exit={{ opacity: 0 }}
               className="fixed top-24 left-1/2 -translate-x-1/2 bg-white bg-opacity-90 backdrop-blur-md border border-indigo-200 shadow-2xl rounded-xl p-6 z-50 w-[320px]"
             >
               <h4 className="text-xl font-semibold mb-4 text-indigo-600 text-center">
@@ -204,6 +209,14 @@ const Dashboard = () => {
                 type="time"
                 name="time"
                 value={formData.time}
+                onChange={handleInputChange}
+                className="w-full mb-3 px-4 py-2 border border-indigo-200 rounded focus:ring-2 focus:ring-indigo-400 outline-none"
+              />
+              <input
+                type="email"
+                name="attendee"
+                placeholder="Attendee Email"
+                value={formData.attendee}
                 onChange={handleInputChange}
                 className="w-full mb-4 px-4 py-2 border border-indigo-200 rounded focus:ring-2 focus:ring-indigo-400 outline-none"
               />
